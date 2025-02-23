@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { useEffect, useState } from "react";
 import type { Generation } from "@shared/schema";
 import { FileAudio, FileText, FileVideo, Image } from "lucide-react";
 
@@ -14,10 +15,27 @@ const TYPE_ICONS = {
   image: Image,
   video: FileVideo,
   audio: FileAudio,
-};
+} as const;
+
+function TypedText({ text }: { text: string }) {
+  const [displayText, setDisplayText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timer = setTimeout(() => {
+        setDisplayText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 30);
+      return () => clearTimeout(timer);
+    }
+  }, [text, currentIndex]);
+
+  return <p className="text-sm font-mono">{displayText}<span className="animate-pulse">|</span></p>;
+}
 
 export default function GenerationPreview({ generation, compact }: GenerationPreviewProps) {
-  const Icon = TYPE_ICONS[generation.type];
+  const Icon = TYPE_ICONS[generation.type as keyof typeof TYPE_ICONS];
 
   return (
     <Card className={`p-4 ${compact ? 'space-y-2' : 'space-y-4'}`}>
@@ -43,7 +61,7 @@ export default function GenerationPreview({ generation, compact }: GenerationPre
 
       <div className="result">
         {generation.type === "text" && (
-          <p className="text-sm">{generation.result}</p>
+          <TypedText text={generation.result} />
         )}
         {generation.type === "image" && (
           <img
