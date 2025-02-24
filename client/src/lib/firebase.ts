@@ -1,6 +1,3 @@
-import { configDotenv } from "dotenv";
-configDotenv();
-
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 

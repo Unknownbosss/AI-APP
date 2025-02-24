@@ -1,5 +1,3 @@
-import {config} from "dotenv";
-config();
 import { OpenAI } from "openai";
 
 async function useText(prompt: string): Promise<string> {
