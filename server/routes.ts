@@ -2,8 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertGenerationSchema } from "@shared/schema";
-
-const MOCK_DELAY = 2000; // Simulate API delay
+import { generateContent } from "./aiml-client";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/generations", async (_req, res) => {
@@ -12,28 +11,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/generate", async (req, res) => {
-    const result = insertGenerationSchema.safeParse(req.body);
+    const result = insertGenerationSchema.safeParse(req.body);    
     if (!result.success) {
       res.status(400).json({ error: "Invalid request" });
       return;
     }
 
-    // Simulate generation delay
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+    try {
+      // Generate content using AI API
+      const generatedResult = await generateContent(
+        result.data.type,
+        result.data.prompt
+      );
 
-    const mockResults = {
-      text: "This is a sample generated text response that would come from an AI model.",
-      image: "https://images.unsplash.com/photo-1576086476234-1103be98f096",
-      video: "https://example.com/mock-video.mp4",
-      audio: "https://example.com/mock-audio.mp3"
-    };
+      const generation = await storage.createGeneration({
+        ...result.data,
+        result: generatedResult,
+      });
 
-    const generation = await storage.createGeneration({
-      ...result.data,
-      result: mockResults[result.data.type]
-    });
-
-    res.json(generation);
+      res.json(generation);
+    } catch (error) {
+      console.error("Generation error:", error);
+      res.status(500).json({ error: "Failed to generate content" });
+    }
   });
 
   const httpServer = createServer(app);

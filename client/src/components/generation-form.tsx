@@ -7,7 +7,7 @@ import { insertGenerationSchema } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import GenerationPreview from "./generation-preview";
+import GenerationPreview from "@/components/generation-preview";
 import { Loader2 } from "lucide-react";
 
 interface GenerationFormProps {
@@ -39,7 +39,7 @@ export default function GenerationForm({ type }: GenerationFormProps) {
         description: "Your content has been generated successfully.",
       });
     },
-    onError: () => {
+    onError: (err) => {
       toast({
         title: "Generation Failed",
         description: "There was an error generating your content.",

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import GenerationPreview from "./generation-preview";
+import GenerationPreview from "@/components/generation-preview";
 import type { Generation } from "@shared/schema";
 
 export default function GenerationHistory() {

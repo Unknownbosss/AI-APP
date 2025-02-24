@@ -1,11 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import GenerationForm from "@/components/generation-form";
 import GenerationHistory from "@/components/generation-history";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Sparkles } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import { Sparkles, LogOut } from "lucide-react";
 
 export default function Home() {
+  const { user, signOut } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       <div className="container mx-auto px-4 py-8">
@@ -16,7 +20,24 @@ export default function Home() {
               AI Generation Platform
             </h1>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-muted-foreground">
+                  {user.email}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={signOut}
+                  title="Sign out"
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </div>
+            )}
+            <ThemeToggle />
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
