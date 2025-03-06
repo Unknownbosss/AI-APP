@@ -7,10 +7,15 @@ import { AuthProvider, useAuth } from "@/lib/auth-context";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Login from "@/pages/login";
+import { AudioProvider } from "../src/context/AudioContext";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
-function PrivateRoute({ component: Component }: { component: React.ComponentType }) {
+function PrivateRoute({
+  component: Component,
+}: {
+  component: React.ComponentType;
+}) {
   const { user, loading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -39,8 +44,10 @@ function App() {
     <ThemeProvider defaultTheme="dark">
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
-          <Router />
-          <Toaster />
+          <AudioProvider>
+            <Router />
+            <Toaster />
+          </AudioProvider>
         </QueryClientProvider>
       </AuthProvider>
     </ThemeProvider>

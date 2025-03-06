@@ -1,9 +1,15 @@
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertGenerationSchema } from "@shared/schema";
+import { Generation, insertGenerationSchema } from "@shared/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +18,18 @@ import { Loader2 } from "lucide-react";
 
 interface GenerationFormProps {
   type: "text" | "image" | "video" | "audio";
+}
+
+// Function to save generation to localStorage
+function saveGenerationToLocal(generation: Generation) {
+  const generations = JSON.parse(localStorage.getItem("generations") || "[]");
+  generations.push(generation);
+  localStorage.setItem("generations", JSON.stringify(generations));
+}
+
+// Function to load generations from localStorage
+function loadGenerationsFromLocal() {
+  return JSON.parse(localStorage.getItem("generations") || "[]");
 }
 
 export default function GenerationForm({ type }: GenerationFormProps) {
@@ -32,7 +50,9 @@ export default function GenerationForm({ type }: GenerationFormProps) {
       const res = await apiRequest("POST", "/api/generate", values);
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Save to localStorage
+      saveGenerationToLocal(data);
       queryClient.invalidateQueries({ queryKey: ["/api/generations"] });
       toast({
         title: "Generation Complete",
@@ -47,6 +67,9 @@ export default function GenerationForm({ type }: GenerationFormProps) {
       });
     },
   });
+
+  // Load existing generations from localStorage
+  const existingGenerations = loadGenerationsFromLocal();
 
   return (
     <div className="space-y-4 mt-4">
@@ -89,7 +112,10 @@ export default function GenerationForm({ type }: GenerationFormProps) {
         </form>
       </Form>
 
-      {mutation.data && <GenerationPreview generation={mutation.data} />}
+      {/* Display existing generations */}
+      {existingGenerations.map((gen: Generation) => (
+        <GenerationPreview key={gen.id} generation={gen} />
+      ))}
     </div>
   );
 }

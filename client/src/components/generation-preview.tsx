@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import type { Generation } from "@shared/schema";
 import { FileAudio, FileText, FileVideo, Image } from "lucide-react";
+import { useAudio } from "@/context/AudioContext";
 
 interface GenerationPreviewProps {
   generation: Generation;
@@ -24,21 +25,30 @@ function TypedText({ text }: { text: string }) {
   useEffect(() => {
     if (currentIndex < text.length) {
       const timer = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
+        setDisplayText((prev) => prev + text[currentIndex]);
+        setCurrentIndex((prev) => prev + 1);
       }, 30);
       return () => clearTimeout(timer);
     }
   }, [text, currentIndex]);
 
-  return <p className="text-sm font-mono">{displayText}<span className="animate-pulse">|</span></p>;
+  return (
+    <p className="text-sm font-mono">
+      {displayText}
+      <span className="animate-pulse">|</span>
+    </p>
+  );
 }
 
-export default function GenerationPreview({ generation, compact }: GenerationPreviewProps) {
+export default function GenerationPreview({
+  generation,
+  compact,
+}: GenerationPreviewProps) {
   const Icon = TYPE_ICONS[generation.type as keyof typeof TYPE_ICONS];
+  const { playAudio, pauseAudio, resumeAudio, stopAudio } = useAudio();
 
   return (
-    <Card className={`p-4 ${compact ? 'space-y-2' : 'space-y-4'}`}>
+    <Card className={`p-4 ${compact ? "space-y-2" : "space-y-4"}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon className="w-4 h-4" />
@@ -48,7 +58,9 @@ export default function GenerationPreview({ generation, compact }: GenerationPre
         </div>
         {generation.createdAt && (
           <span className="text-sm text-muted-foreground">
-            {formatDistanceToNow(new Date(generation.createdAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(generation.createdAt), {
+              addSuffix: true,
+            })}
           </span>
         )}
       </div>
@@ -60,9 +72,7 @@ export default function GenerationPreview({ generation, compact }: GenerationPre
       )}
 
       <div className="result">
-        {generation.type === "text" && (
-          <TypedText text={generation.result} />
-        )}
+        {generation.type === "text" && <TypedText text={generation.result} />}
         {generation.type === "image" && (
           <img
             src={generation.result}
@@ -76,8 +86,33 @@ export default function GenerationPreview({ generation, compact }: GenerationPre
           </div>
         )}
         {generation.type === "audio" && (
-          <div className="bg-muted rounded-md p-4 text-center text-sm text-muted-foreground">
-            Audio preview not available
+          <div className="flex gap-2">
+            <Badge
+              variant="outline"
+              className="capitalize p-2 hover:border-purple-500"
+            >
+              <button onClick={() => playAudio(generation.result)}>
+                Play Audio
+              </button>
+            </Badge>
+            <Badge
+              variant="outline"
+              className="capitalize hover:border-purple-500"
+            >
+              <button onClick={pauseAudio}>Pause Audio</button>
+            </Badge>
+            <Badge
+              variant="outline"
+              className="capitalize hover:border-purple-500"
+            >
+              <button onClick={resumeAudio}>Resume Audio</button>
+            </Badge>
+            <Badge
+              variant="outline"
+              className="capitalize hover:border-purple-500"
+            >
+              <button onClick={stopAudio}>Stop Audio</button>
+            </Badge>
           </div>
         )}
       </div>

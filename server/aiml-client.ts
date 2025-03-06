@@ -10,8 +10,8 @@ export async function generateContent(
       return useText(prompt);
     // case "image":
     //   return useImage(prompt);
-    // case "audio":
-    //   return useAudio(prompt)
+    case "audio":
+      return useAudio(prompt);
     // case "video":
     //   return useVideo(prompt)
     default:

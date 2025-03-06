@@ -15,7 +15,7 @@ async function useText(prompt: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: "You are an AI that replies using Nigerian Pidgin",
+          content: "You are an AI Agent",
         },
         {
           role: "user",
@@ -32,7 +32,40 @@ async function useText(prompt: string): Promise<string> {
     throw new Error("Failed to generate content");
   }
 }
-function useAudio(prompt: string) {}
+async function useAudio(prompt: string) {
+  console.log(prompt);
+
+  const baseURL = "https://api.aimlapi.com/v1";
+  const apiKey = import.meta.env.VITE_AIML_API_KEY;
+
+  const api = new OpenAI({
+    apiKey,
+    baseURL,
+  });
+
+  try {
+    const response = await api.chat.completions.create({
+      model: "mistralai/Mistral-7B-Instruct-v0.2",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI Assitant",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 256,
+    });
+
+    return response.choices[0].message.content || "";
+  } catch (error) {
+    console.error("Error generating content:", error);
+    throw new Error("Failed to generate content");
+  }
+}
 function useImage(prompt: string) {}
 function useVideo(prompt: string) {}
 
