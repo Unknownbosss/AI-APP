@@ -23,8 +23,13 @@ export default function Home() {
           <div className="flex items-center gap-4">
             {user && (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground">
-                  {user.email}
+                <span className="flex gap-3 text-xl text-purple-600 text-muted-foreground items-center">
+                  <img
+                    src={user.photoURL || ""}
+                    alt="profile iamge"
+                    className="w-10 h-10 rounded-full"
+                  />
+                  {user.displayName?.split(" ")[0].toUpperCase()}
                 </span>
                 <Button
                   variant="ghost"
