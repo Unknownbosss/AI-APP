@@ -8,6 +8,7 @@ import { useAudio } from "@/context/AudioContext";
 
 interface GenerationPreviewProps {
   generation: Generation;
+  history?: boolean;
   compact?: boolean;
 }
 
@@ -42,7 +43,8 @@ function TypedText({ text }: { text: string }) {
 
 export default function GenerationPreview({
   generation,
-  compact,
+  history,
+  compact = true,
 }: GenerationPreviewProps) {
   const Icon = TYPE_ICONS[generation.type as keyof typeof TYPE_ICONS];
   const { playAudio, pauseAudio, resumeAudio, stopAudio } = useAudio();
@@ -65,14 +67,20 @@ export default function GenerationPreview({
         )}
       </div>
 
-      {!compact && (
+      {compact && (
         <div className="text-sm text-muted-foreground">
           <strong>Prompt:</strong> {generation.prompt}
         </div>
       )}
 
       <div className="result">
-        {generation.type === "text" && <TypedText text={generation.result} />}
+        {generation.type === "text" &&
+          (history ? (
+            <p className="text-sm font-mono">{generation.result}</p>
+          ) : (
+            <TypedText text={generation.result} />
+          ))}
+
         {generation.type === "image" && (
           <img
             src={generation.result}
@@ -80,11 +88,13 @@ export default function GenerationPreview({
             className="w-full h-48 object-cover rounded-md"
           />
         )}
+
         {generation.type === "video" && (
           <div className="bg-muted rounded-md p-4 text-center text-sm text-muted-foreground">
             Video preview not available
           </div>
         )}
+
         {generation.type === "audio" && (
           <div className="flex gap-2">
             <Badge

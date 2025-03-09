@@ -28,7 +28,7 @@ function saveGenerationToLocal(generation: Generation) {
 }
 
 // Function to load generations from localStorage
-function loadGenerationsFromLocal() {
+function loadGenerationsFromLocal(): Generation[] {
   return JSON.parse(localStorage.getItem("generations") || "[]");
 }
 
@@ -70,7 +70,6 @@ export default function GenerationForm({ type }: GenerationFormProps) {
 
   // Load existing generations from localStorage
   const existingGenerations = loadGenerationsFromLocal();
-
   return (
     <div className="space-y-4 mt-4">
       <Form {...form}>
@@ -87,7 +86,7 @@ export default function GenerationForm({ type }: GenerationFormProps) {
                 <FormControl>
                   <Textarea
                     placeholder={`Describe the ${type} you want to generate...`}
-                    className="h-32"
+                    className="h-32 resize-none"
                     {...field}
                   />
                 </FormControl>
@@ -113,9 +112,15 @@ export default function GenerationForm({ type }: GenerationFormProps) {
       </Form>
 
       {/* Display existing generations */}
-      {existingGenerations.map((gen: Generation) => (
-        <GenerationPreview key={gen.id} generation={gen} />
-      ))}
+      {existingGenerations
+        .sort((a, b) => {
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        })
+        .map((gen: Generation) => (
+          <GenerationPreview key={gen.id} generation={gen} />
+        ))}
     </div>
   );
 }
