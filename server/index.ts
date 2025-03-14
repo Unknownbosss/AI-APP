@@ -20,7 +20,7 @@ const corsOptions = {
   credentials: true, // Allow credentials (if needed)
 };
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
