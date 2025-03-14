@@ -1,8 +1,26 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
+
+// List of allowed origins
+const allowedOrigins =
+  process.env.NODE_ENV === "development"
+    ? ["http://localhost:3000/", "https://ai-app-six-tan.vercel.app"]
+    : ["https://ai-app-six-tan.vercel.app"];
+
+const corsOptions = {
+  origin: "http://localhost:3001", 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true, // Allow credentials (if needed)
+};
+
+// app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -59,11 +77,14 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on port 3000
   // this serves both the API and the client
   const port = 3000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  server.listen(
+    {
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    },
+    () => {
+      log(`serving on port ${port}`);
+    }
+  );
 })();

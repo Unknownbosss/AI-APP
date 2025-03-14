@@ -85,14 +85,18 @@ export default function GenerationPreview({
           <img
             src={generation.result}
             alt={generation.prompt}
-            className="w-full h-48 object-cover rounded-md"
+            className="w-96 h-96 object-cover rounded-md"
           />
         )}
 
         {generation.type === "video" && (
-          <div className="bg-muted rounded-md p-4 text-center text-sm text-muted-foreground">
-            Video preview not available
-          </div>
+          <video
+            src={generation.result}
+            controls
+            className="w-96 h-96 object-cover rounded-md"
+          >
+            Your browser does not support the video tag.
+          </video>
         )}
 
         {generation.type === "audio" && (

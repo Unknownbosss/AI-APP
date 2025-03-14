@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import GenerationPreview from "@/components/generation-preview";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 interface GenerationFormProps {
   type: "text" | "image" | "video" | "audio";
@@ -48,6 +49,7 @@ export default function GenerationForm({ type }: GenerationFormProps) {
   const mutation = useMutation({
     mutationFn: async (values: { prompt: string; type: string }) => {
       const res = await apiRequest("POST", "/api/generate", values);
+
       return res.json();
     },
     onSuccess: (data) => {
@@ -58,6 +60,7 @@ export default function GenerationForm({ type }: GenerationFormProps) {
         title: "Generation Complete",
         description: "Your content has been generated successfully.",
       });
+      form.reset();
     },
     onError: (err) => {
       toast({
@@ -74,8 +77,18 @@ export default function GenerationForm({ type }: GenerationFormProps) {
     <div className="space-y-4 mt-4">
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+          onSubmit={form.handleSubmit((values) => {
+            mutation.mutate(values);
+          })}
           className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              form.handleSubmit((values) => {
+                mutation.mutate(values);
+              })();
+            }
+          }}
         >
           <FormField
             control={form.control}
@@ -118,8 +131,8 @@ export default function GenerationForm({ type }: GenerationFormProps) {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
         })
-        .map((gen: Generation) => (
-          <GenerationPreview key={gen.id} generation={gen} />
+        .map((gen: Generation, i) => (
+          <GenerationPreview key={i} generation={gen} />
         ))}
     </div>
   );

@@ -1,72 +1,60 @@
-import { OpenAI } from "openai";
+import AIService from "../services/ImageVideoServices";
+import ChatAPI from "../services/TextAudioService";
+import dotenv from "dotenv";
+dotenv.config();
+
+const magicHourApiKey = process.env.VITE_MAGICHOUR_API_KEY || "";
+const openAIApiKey = process.env.VITE_OPENAI_API_KEY || "";
+
+if (!magicHourApiKey || !openAIApiKey) {
+  throw new Error("API keys must be set in the environment variables.");
+}
+
+const aiService = new AIService(magicHourApiKey);
+const chatAPI = new ChatAPI(openAIApiKey);
 
 async function useText(prompt: string): Promise<string> {
-  const baseURL = "https://api.aimlapi.com/v1";
-  const apiKey = import.meta.env.VITE_AIML_API_KEY;
-
-  const api = new OpenAI({
-    apiKey,
-    baseURL,
-  });
-
-  try {
-    const response = await api.chat.completions.create({
-      model: "mistralai/Mistral-7B-Instruct-v0.2",
-      messages: [
-        {
-          role: "system",
-          content: "You are an AI Agent",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 256,
-    });
-
-    return response.choices[0].message.content || "";
-  } catch (error) {
-    console.error("Error generating content:", error);
-    throw new Error("Failed to generate content");
-  }
+  return await chatAPI.generateText(prompt);
 }
+
 async function useAudio(prompt: string) {
-  console.log(prompt);
+  return await chatAPI.generateText(prompt);
+}
 
-  const baseURL = "https://api.aimlapi.com/v1";
-  const apiKey = import.meta.env.VITE_AIML_API_KEY;
+async function useImage(prompt: string) {
+  const imageName = prompt.substring(0, 14);
+  const userPrompt = prompt;
 
-  const api = new OpenAI({
-    apiKey,
-    baseURL,
-  });
-
-  try {
-    const response = await api.chat.completions.create({
-      model: "mistralai/Mistral-7B-Instruct-v0.2",
-      messages: [
-        {
-          role: "system",
-          content: "You are an AI Assitant",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 256,
-    });
-
-    return response.choices[0].message.content || "";
-  } catch (error) {
-    console.error("Error generating content:", error);
-    throw new Error("Failed to generate content");
+  const imageId = await aiService.generateImage(imageName, userPrompt);
+  if (imageId) {
+    try {
+      const imageDetails = await aiService.waitForImageCompletion(imageId);
+      if (imageDetails && imageDetails.downloads) {
+        const imageUrl = imageDetails.downloads[0].url; // Get the URL of the generated image
+        return imageUrl;
+      }
+    } catch (error: any) {
+      console.error("Error during image processing:", error.message);
+    }
   }
 }
-function useImage(prompt: string) {}
-function useVideo(prompt: string) {}
+
+async function useVideo(prompt: string) {
+  const videoName = prompt.substring(0, 20); // Extract a name for the video
+  const userPrompt = prompt;
+
+  const videoId = await aiService.generateVideo(videoName, userPrompt);
+  if (videoId) {
+    try {
+      const videoDetails = await aiService.fetchVideoDetails(videoId);
+      if (videoDetails && videoDetails.download) {
+        const videoUrl = videoDetails.download.url; // Get the URL of the generated video
+        return videoUrl;
+      }
+    } catch (error: any) {
+      console.error("Error during video processing:", error.message);
+    }
+  }
+}
 
 export { useText, useAudio, useImage, useVideo };
