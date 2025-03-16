@@ -11,8 +11,8 @@ const app = express();
 // List of allowed origins
 const allowedOrigins =
   process.env.NODE_ENV === "development"
-    ? ["http://localhost:3000/", "https://ai-app-six-tan.vercel.app"]
-    : ["https://ai-app-six-tan.vercel.app"];
+    ? ["http://localhost:3000/", "https://ai-app-reborn.netlify.app/"]
+    : ["https://ai-app-reborn.netlify.app/"];
 
 const corsOptions = {
   origin: "http://localhost:3001", 
